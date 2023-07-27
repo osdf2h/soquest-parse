@@ -30,7 +30,18 @@ Follow [tg channel](t.me/soquest_everyday (https://t.me/soquest_everyday)) for f
    
    ```shell
    ADDRESS=<your wallet address>
+   SIGNATURE=<your signature>
    ```
+   
+## Get signature
+
+1. Visit [SoQuest](https://soquest.xyz/campaign)
+2. Press `Ctrl + Shift + C`
+3. `Network -> Fetch/XHR`
+4. Refresh the page
+5. Connect your wallet
+6. Find request with name `unread`
+7. Copy your signature from `Request Headers`
    
 ## Run locally
 
