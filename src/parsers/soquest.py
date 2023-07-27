@@ -2,6 +2,7 @@ import logging
 import datetime
 import json
 import math
+import os
 import time
 
 from tqdm import tqdm
@@ -21,10 +22,12 @@ PAGE_SIZE = 12
 
 
 class SoQuest:
-    def __init__(self, address: str):
+    def __init__(self, address: str, signature: str):
         self.address = address
+        self.signature = signature
         self.headers = {
-            'address': self.address
+            'address': self.address,
+            'signature': self.signature
         }
         self.data = []
         self.upload_data = []
@@ -38,6 +41,7 @@ class SoQuest:
             logging.info(f'Got {total_count} campaigns. Total pages: {total_pages}')
             for page in tqdm(range(1, total_pages+1)):
                 self.data.extend(self.__get_data_per_page(page))
+            self.__dump_json()
             self.__process_data()
             self.__dump_xlsx()
         else:
@@ -100,6 +104,7 @@ class SoQuest:
                 {
                     'Кол-во гемов': gems_count,
                     'Ссылка': data.get('url'),
+                    'Название кампании': data.get('space_name'),
                     'Кол-во заданий': data.get('task_count'),
                     'Тип призов': ', '.join(data.get("prize_types")),
                     'Осталось времени (ч.)': hours_left
@@ -111,7 +116,13 @@ class SoQuest:
             json.dump(self.data, f, indent=4, ensure_ascii=False)
 
     def __dump_xlsx(self):
-        df = pd.DataFrame(self.upload_data)
-        df = df.sort_values(by='Кол-во гемов', ascending=False)
         cur_datetime = datetime.datetime.now().strftime('%d_%m_%Y_%H_%M_%S')
-        df.to_excel(BASE_DIR / 'assets' / f'result_{cur_datetime}.xlsx', index=False)
+        filename = BASE_DIR / 'assets' / f'result_{cur_datetime}.xlsx'
+        df = pd.DataFrame(self.upload_data)
+        grouped = df.groupby('Кол-во гемов')
+        for name, group in grouped:
+            if not os.path.exists(filename):
+                group.to_excel(filename, sheet_name=str(name), index=False)
+            else:
+                with pd.ExcelWriter(filename, engine='openpyxl', mode='a') as writer:
+                    group.to_excel(writer, sheet_name=str(name), index=False)

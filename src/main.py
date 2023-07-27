@@ -1,9 +1,9 @@
-from settings import ADDRESS
-from parse_soquest import SoQuest
+from settings import ADDRESS, SIGNATURE
+from parsers.soquest import SoQuest
 
 
 def main():
-    soquest = SoQuest(ADDRESS)
+    soquest = SoQuest(ADDRESS, SIGNATURE)
     soquest.parse_data()
 
 
